@@ -73,6 +73,97 @@ SAMPLE_RESTAURANTS = [
         "Opening hours and delivery ETA are uncertain late at night.",
         "https://example.com/restaurants/al-frescos-ocean",
     ),
+    (
+        6,
+        "Cơm Tấm Sài Gòn OP1",
+        "Ocean Park 1",
+        "com tam",
+        4.5,
+        35000,
+        25,
+        0.88,
+        1,
+        "Popular broken rice spot with fast delivery and student-friendly prices.",
+        "https://example.com/restaurants/com-tam-saigon",
+    ),
+    (
+        7,
+        "Bún Chả Hà Nội S1",
+        "Ocean Park 1",
+        "bun cha",
+        4.3,
+        40000,
+        30,
+        0.82,
+        1,
+        "Authentic Hanoi bun cha with consistent quality and quick service.",
+        "https://example.com/restaurants/bun-cha-hanoi",
+    ),
+    (
+        8,
+        "Bánh Mì Anh Đông",
+        "Ocean Park 1",
+        "banh mi",
+        4.8,
+        20000,
+        15,
+        0.92,
+        1,
+        "Best banh mi in the area, very fast delivery under 20 minutes.",
+        "https://example.com/restaurants/banh-mi-anh-dong",
+    ),
+    (
+        9,
+        "Trà Sữa ToCoToCo OP1",
+        "Ocean Park 1",
+        "tra sua",
+        4.2,
+        35000,
+        20,
+        0.75,
+        1,
+        "Popular milk tea chain with reliable delivery times.",
+        "https://example.com/restaurants/tocotoco-op1",
+    ),
+    (
+        10,
+        "Cơm Văn Phòng Nhà Mình",
+        "Ocean Park 1",
+        "com van phong",
+        4.6,
+        45000,
+        28,
+        0.87,
+        1,
+        "Home-style office lunch boxes with diverse daily menu.",
+        "https://example.com/restaurants/com-van-phong",
+    ),
+    (
+        11,
+        "Gà Rán Crispy OP1",
+        "Ocean Park 1",
+        "ga ran",
+        4.4,
+        55000,
+        22,
+        0.83,
+        1,
+        "Crispy fried chicken with fast delivery, popular with families.",
+        "https://example.com/restaurants/ga-ran-crispy",
+    ),
+    (
+        12,
+        "Mì Quảng Bà Năm",
+        "Ocean Park 1",
+        "mi quang",
+        4.7,
+        42000,
+        35,
+        0.79,
+        1,
+        "Authentic Mi Quang from Da Nang, generous portions.",
+        "https://example.com/restaurants/mi-quang-ba-nam",
+    ),
 ]
 
 
@@ -145,9 +236,13 @@ def _row_to_restaurant(row):
 
 def query_restaurants(location, max_wait_time=None):
     """Return restaurant candidates filtered by location and optional ETA limit."""
+    # Normalize: strip sub-location like "Ocean Park 1 - S1.06" → try both full and base
+    loc_lower = location.lower().strip()
+    base_loc = loc_lower.split(" - ")[0].strip()
+
     with _connect() as conn:
-        sql = "SELECT * FROM restaurants WHERE lower(location) LIKE ?"
-        params = [f"%{location.lower()}%"]
+        sql = "SELECT * FROM restaurants WHERE (lower(location) LIKE ? OR lower(location) LIKE ?)"
+        params = [f"%{loc_lower}%", f"%{base_loc}%"]
         if max_wait_time is not None:
             sql += " AND (predicted_eta IS NULL OR predicted_eta <= ?)"
             params.append(int(max_wait_time))

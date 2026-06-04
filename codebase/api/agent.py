@@ -5,12 +5,15 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-load_dotenv()
+
+# Load .env from codebase root
+_CODEBASE_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(_CODEBASE_ROOT / ".env")
 
 from api.providers.openrouter_provider import OpenRouterProvider
 from api.tool_runners import execute_tool
+from api.tools import get_tool_definitions
 
 
 class ReActAgent:
@@ -23,9 +26,16 @@ class ReActAgent:
 
     def _load_system_prompt(self):
         prompt_path = Path(__file__).resolve().parent.parent / "artifacts" / "system_prompt.md"
+        base_prompt = ""
         if prompt_path.exists():
-            return prompt_path.read_text(encoding="utf-8")
-        return "You are an AI assistant using the ReAct framework."
+            base_prompt = prompt_path.read_text(encoding="utf-8")
+        else:
+            base_prompt = "You are an AI assistant using the ReAct framework."
+
+        # Append tool definitions so the LLM knows exact schemas
+        tool_defs = get_tool_definitions()
+        tools_json = json.dumps(tool_defs, indent=2, ensure_ascii=False)
+        return f"{base_prompt}\n\n## Tool Schemas (JSON)\n{tools_json}"
 
     def _extract_json(self, text):
         text = text.strip()
@@ -44,10 +54,11 @@ class ReActAgent:
             raise ValueError("LLM response must be a JSON object")
         return json_str, parsed
 
-    def run(self, user_query):
+    def run(self, user_query, location="Ocean Park 1"):
+        user_message = f"User Query: {user_query}\nLocation: {location}"
         messages = [
             {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": f"User Query: {user_query}"},
+            {"role": "user", "content": user_message},
         ]
         action_trace = []
         step_count = 1
