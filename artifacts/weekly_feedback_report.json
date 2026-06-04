@@ -1,0 +1,27 @@
+{
+  "period_days": 7,
+  "generated_at": "2026-06-04T04:46:04+00:00",
+  "total_feedback": 1,
+  "average_rating": 5.0,
+  "accuracy_rate": 1.0,
+  "failure_rate": 0.0,
+  "nps": 100.0,
+  "top_queries": [
+    [
+      "giao nhanh",
+      1
+    ]
+  ],
+  "partner_feedback_count": [
+    [
+      "GrabFood",
+      1
+    ]
+  ],
+  "confidence_mix": {
+    "HIGH": 1
+  },
+  "pending_corrections": 0,
+  "high_severity_corrections": 0,
+  "privacy_note": "No names, phone numbers, addresses, emails, or device identifiers are stored."
+}
