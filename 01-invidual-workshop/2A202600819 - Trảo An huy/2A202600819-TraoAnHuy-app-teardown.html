@@ -1,0 +1,517 @@
+html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workshop - AI Moni Needfinding Report</title>
+
+<style>
+:root{
+--primary:#2563eb;
+--success:#10b981;
+--warning:#f59e0b;
+--danger:#ef4444;
+--purple:#8b5cf6;
+--bg:#f3f6fb;
+--card:#ffffff;
+--text:#1f2937;
+--border:#e5e7eb;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:Inter,Segoe UI,sans-serif;
+background:var(--bg);
+color:var(--text);
+line-height:1.6;
+padding:30px;
+}
+
+.container{
+max-width:1300px;
+margin:auto;
+}
+
+.hero{
+background:linear-gradient(135deg,#2563eb,#4f46e5);
+color:white;
+padding:35px;
+border-radius:20px;
+margin-bottom:25px;
+box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+
+.hero h1{
+font-size:34px;
+margin-bottom:10px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:20px;
+margin-top:20px;
+}
+
+.card{
+background:white;
+padding:22px;
+border-radius:18px;
+box-shadow:0 3px 12px rgba(0,0,0,.08);
+border:1px solid #e5e7eb;
+margin-bottom:20px;
+}
+
+.card h2{
+margin-bottom:12px;
+font-size:22px;
+color:#2563eb;
+}
+
+.badge{
+display:inline-block;
+padding:6px 12px;
+border-radius:999px;
+font-size:12px;
+font-weight:700;
+margin-bottom:10px;
+}
+
+.blue{background:#dbeafe;color:#1d4ed8;}
+.green{background:#d1fae5;color:#047857;}
+.yellow{background:#fef3c7;color:#92400e;}
+.red{background:#fee2e2;color:#b91c1c;}
+.purple{background:#ede9fe;color:#6d28d9;}
+
+.table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+.table th{
+background:#eff6ff;
+}
+
+.table td,.table th{
+border:1px solid #ddd;
+padding:12px;
+}
+
+.evidence{
+background:#fff7ed;
+border-left:6px solid #f97316;
+padding:16px;
+border-radius:10px;
+margin-top:10px;
+}
+
+.quote{
+background:#111827;
+color:white;
+padding:18px;
+border-radius:12px;
+margin-top:10px;
+overflow:auto;
+}
+
+img{
+max-width:100%;
+border-radius:14px;
+margin-top:15px;
+box-shadow:0 6px 20px rgba(0,0,0,.15);
+}
+
+.path{
+padding:18px;
+border-radius:14px;
+margin-bottom:15px;
+}
+
+.happy{
+background:#ecfdf5;
+border-left:6px solid #10b981;
+}
+
+.low{
+background:#fffbeb;
+border-left:6px solid #f59e0b;
+}
+
+.fail{
+background:#fef2f2;
+border-left:6px solid #ef4444;
+}
+
+.correct{
+background:#f5f3ff;
+border-left:6px solid #8b5cf6;
+}
+
+.flow{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+align-items:center;
+gap:10px;
+margin-top:15px;
+}
+
+.node{
+padding:14px 18px;
+background:#eff6ff;
+border:1px solid #bfdbfe;
+border-radius:12px;
+font-weight:600;
+}
+
+.arrow{
+font-size:22px;
+font-weight:bold;
+color:#2563eb;
+}
+
+pre{
+background:#111827;
+color:white;
+padding:18px;
+border-radius:12px;
+overflow:auto;
+}
+
+.asis{
+background:#fff1f2;
+padding:20px;
+border-radius:14px;
+border:1px solid #fecdd3;
+}
+
+.tobe{
+background:#ecfeff;
+padding:20px;
+border-radius:14px;
+border:1px solid #a5f3fc;
+}
+
+.timeline{
+display:flex;
+gap:15px;
+flex-wrap:wrap;
+margin-top:15px;
+}
+
+.step{
+flex:1;
+min-width:180px;
+background:white;
+padding:15px;
+border-radius:14px;
+border-top:4px solid #2563eb;
+box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+.footer{
+background:white;
+padding:25px;
+border-radius:16px;
+border-left:6px solid #2563eb;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="hero">
+<h1>Workshop — Mổ App AI Thật</h1>
+<p><strong>Sản phẩm:</strong> Moni (MoMo AI Assistant)</p>
+<p><strong>Người thực hiện:</strong> Trảo An Huy — 2A202600819</p>
+<p><strong>Finding:</strong> Domain Guardrail & Recovery Flow</p>
+</div>
+
+<div class="card">
+<span class="badge blue">PROMISE VS REALITY</span>
+<h2>1. Product Promise vs Reality</h2>
+
+<table class="table">
+<tr>
+<th>Tiêu chí</th>
+<th>Nội dung</th>
+</tr>
+
+<tr>
+<td>Product hứa gì?</td>
+<td>Trợ lý AI hỗ trợ tài chính cá nhân, giao dịch, ngân sách và phân tích chi tiêu.</td>
+</tr>
+
+<tr>
+<td>User mục tiêu</td>
+<td>Người dùng MoMo muốn quản lý tài chính.</td>
+</tr>
+
+<tr>
+<td>Kỳ vọng</td>
+<td>AI chỉ hỗ trợ các vấn đề tài chính.</td>
+</tr>
+
+<tr>
+<td>Reality</td>
+<td>AI trả lời cả câu hỏi ngoài tài chính.</td>
+</tr>
+
+</table>
+</div>
+
+<div class="card">
+<span class="badge yellow">EVIDENCE</span>
+<h2>2. Evidence</h2>
+
+<div class="evidence">
+<strong>Prompt kiểm thử:</strong>
+</div>
+
+<div class="quote">
+小明对领导说：“您的管理方式真是高明，让我们每天都能体验到大汗淋漓的充实感，大家都感恩戴德呢。”<br><br>
+请问小明是在真正赞美领导，还是在表达不满？
+</div>
+
+<ul style="margin-top:15px;padding-left:20px;">
+<li>✅ Hiểu tiếng Trung</li>
+<li>✅ Hiểu ngữ cảnh công sở</li>
+<li>✅ Phân tích đúng</li>
+<li>❌ Không liên quan tài chính</li>
+<li>❌ Không từ chối</li>
+<li>❌ Không chuyển hướng</li>
+</ul>
+
+<img src="../images/individual_momo_TraoAnHuy_example.jpg" alt="Screenshot">
+
+<p style="text-align:center;margin-top:10px;">
+Moni trả lời câu hỏi ngoài domain tài chính.
+</p>
+
+</div>
+
+<div class="card">
+<span class="badge purple">4 PATHS</span>
+<h2>3. Workflow Analysis</h2>
+
+<div class="path happy">
+<h3>✅ Happy Path</h3>
+<p>User hỏi: "Tôi đã chi bao nhiêu tiền ăn tháng này?"</p>
+
+<div class="flow">
+<div class="node">User</div>
+<div class="arrow">→</div>
+<div class="node">Moni</div>
+<div class="arrow">→</div>
+<div class="node">Financial Data</div>
+<div class="arrow">→</div>
+<div class="node">Answer</div>
+</div>
+
+</div>
+
+<div class="path low">
+<h3>🟡 Low Confidence Path</h3>
+
+<p>User hỏi: "Chi tiêu linh tinh là gì?"</p>
+
+<p>Hiện tại AI tự suy đoán.</p>
+
+<p>Đề xuất:</p>
+
+<ul>
+<li>Chi tiêu giải trí</li>
+<li>Chi tiêu cá nhân</li>
+<li>Chi tiêu khác</li>
+</ul>
+
+</div>
+
+<div class="path fail">
+<h3>🔴 Failure Path</h3>
+
+<p>Prompt ngoài tài chính vẫn được trả lời.</p>
+
+<p>User không biết đâu là phạm vi được đảm bảo bởi sản phẩm.</p>
+
+</div>
+
+<div class="path correct">
+<h3>🟣 Correction Path</h3>
+
+<p>Chưa có:</p>
+
+<ul>
+<li>Feedback</li>
+<li>Report</li>
+<li>Learning Loop</li>
+</ul>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<span class="badge red">FINDING</span>
+
+<h2>4. Findings</h2>
+
+<h3>Finding #1</h3>
+
+<p>
+Khi user gửi câu hỏi ngoài phạm vi tài chính,
+Moni vẫn cố gắng trả lời bằng năng lực tổng quát của LLM.
+Hậu quả là user khó xác định đâu là phạm vi được đảm bảo chính xác.
+</p>
+
+<p>
+<b>Layer:</b> Promise + UX Recovery
+</p>
+
+<hr style="margin:20px 0">
+
+<h3>Finding #2</h3>
+
+<p>
+Khi AI không chắc intent,
+Moni không hỏi lại hoặc đưa lựa chọn.
+</p>
+
+<p>
+<b>Layer:</b> Intent Detection
+</p>
+
+</div>
+
+<div class="card">
+
+<span class="badge green">PRODUCT DECISION</span>
+
+<h2>5. Product Decision</h2>
+
+<ul style="padding-left:20px;">
+<li>REQ-01: Intent Classification trước LLM</li>
+<li>REQ-02: Clarification UI khi confidence thấp</li>
+<li>REQ-03: Domain Guardrail</li>
+<li>REQ-04: Feedback Loop</li>
+</ul>
+
+</div>
+
+<div class="grid">
+
+<div class="asis">
+
+<h2>6. As-Is</h2>
+
+<pre>
+User
+ │
+ ▼
+Moni
+ │
+ ▼
+LLM
+ │
+ ▼
+Answer
+
+❌ No Domain Check
+❌ No Recovery
+❌ No Clarification
+</pre>
+
+</div>
+
+<div class="tobe">
+
+<h2>7. To-Be</h2>
+
+<pre>
+User
+ │
+ ▼
+Intent Detector
+ │
+ ├── Financial
+ │      ▼
+ │   Finance AI
+ │      ▼
+ │    Answer
+ │
+ ├── Low Confidence
+ │      ▼
+ │ Clarification UI
+ │
+ └── Out of Domain
+        ▼
+ Domain Guardrail
+        ▼
+ Feedback Log
+</pre>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<span class="badge blue">SPEC CHANGE</span>
+
+<h2>8. SPEC Impact</h2>
+
+<div class="timeline">
+
+<div class="step">
+<h4>Guardrail</h4>
+<p>Kiểm tra domain trước LLM.</p>
+</div>
+
+<div class="step">
+<h4>Clarification</h4>
+<p>Hỏi lại khi confidence thấp.</p>
+</div>
+
+<div class="step">
+<h4>Recovery</h4>
+<p>Cho phép user sửa AI.</p>
+</div>
+
+<div class="step">
+<h4>Learning Loop</h4>
+<p>Lưu feedback để cải thiện hệ thống.</p>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+<h2>Kết luận</h2>
+
+<p>
+Moni có khả năng hiểu ngôn ngữ rất tốt nhưng chưa thể hiện rõ ranh giới của một trợ lý tài chính. Vấn đề chính không phải AI trả lời sai, mà là sản phẩm chưa quản lý được kỳ vọng của người dùng khi AI trả lời ngoài phạm vi nghiệp vụ.
+</p>
+
+<p style="margin-top:15px;">
+<b>SPEC Change:</b> Bổ sung Domain Guardrail, Clarification Flow và Feedback Loop.
+</p>
+
+</div>
+
+</div>
+
+</body>
+</html>
+

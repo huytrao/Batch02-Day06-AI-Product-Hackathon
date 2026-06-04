@@ -1,0 +1,119 @@
+# Demo Script — Ocean Park 1 Eats (3 minutes)
+
+## Demo structure:
+- Happy path: ~90 seconds
+- Failure path: ~30 seconds  
+- Q&A: ~30 seconds
+- **Total: 3 minutes**
+
+---
+
+## HAPPY PATH (90 seconds)
+
+### Setup (10 seconds)
+"Hello. We're building a quick restaurant finder for Ocean Park 1 residents. The problem: people waste 10+ minutes checking Facebook, Google Maps, and delivery apps to find what to eat and whether it will deliver fast.
+
+Our solution: aggregate data from multiple sources and recommend 2–3 restaurants with predicted delivery time and confidence."
+
+### Demo (70 seconds)
+1. **Open prototype** (5 seconds)
+   - Show a simple page: search box + "Giao nhanh (Fast Delivery)" button
+   - Explain: "This is our MVP. No code yet—just UI flow and fake data."
+
+2. **Search** (15 seconds)
+   - Click search or enter default: "Ocean Park 1, now"
+   - System processes (show loading for 2–3 seconds)
+   - Show results table:
+     | Restaurant | ETA (min) | Confidence | Source Links |
+     |---|---|---|---|
+     | Bún Bò Huế Anh Đào | 35–40 | 0.92 | FB / Google / Grab ✓ |
+     | Cơm Tấm Sài Gòn | 40–45 | 0.78 | Google / Shopee ✓ |
+
+3. **Evidence** (20 seconds)
+   - Click first restaurant result
+   - Show evidence pop-up:
+     - "Recent Facebook post (2h ago): 'Vẫn mở và giao nhanh lắm'"
+     - Shopee ETA: 35–40 min (last updated 30 min ago)
+     - Google: "Open now · 4.8★ · 47 reviews"
+   - Explain: "We show sources so user can trust the recommendation. If confidence is low, we ask user to call first."
+
+4. **Confirm and next step** (10 seconds)
+   - User clicks "View Menu" → redirects to Shopee/Grab
+   - Say: "In Day 06, we'll build the actual UI. Today, we just wanted to show the flow and validate the idea with you."
+
+### Transition (5 seconds)
+"That's the happy path. Now let me show you how we handle when things go wrong."
+
+---
+
+## FAILURE PATH (30 seconds)
+
+### Setup (5 seconds)
+"Scenario: what if the AI makes a wrong prediction?"
+
+### Demo (20 seconds)
+1. **Show second restaurant (Cơm Tấm Sài Gòn)** with low confidence (0.78)
+   - Explain: "Here, signals conflict. Google says open but no recent Shopee update. Confidence is lower."
+
+2. **What does the prototype do?**
+   - Show message: ⚠️ "Low confidence. Recommendation based on outdated data. Call ahead?"
+   - Offer: [Call] [Choose different] [See all sources]
+
+3. **If user calls and finds it closed:**
+   - User submits feedback form: "Closed"
+   - System logs and updates evidence tag
+   - Prototype updates next recommendation
+
+4. **Fallback options:**
+   - Alternative suggestion: Bánh Mì Anh Đông (0.88 confidence, 30–35 min)
+   - Say: "We always have a backup. And the team owner tracks failures for Day 06 validation."
+
+### Transition (5 seconds)
+"That's the failure path. Ready for questions?"
+
+---
+
+## Q&A (30 seconds)
+
+Prepare answers for likely questions:
+
+1. **Q: Why not just integrate with Grab/Shopee APIs?**
+   - A: Too risky and slow for Day 05. We're validating the idea first with fake data. Day 06, if this idea is strong, we plan scraping or partnership.
+
+2. **Q: How do you handle privacy/scraping TOS?**
+   - A: Right now, we use only public posts and anonymized quotes. No scraping of personal data. We'll revisit this in Day 06.
+
+3. **Q: What if the delivery time estimate is still wrong?**
+   - A: That's why we show confidence and sources. User always has the choice to confirm before ordering. We're not fully automating—just augmenting their decision.
+
+4. **Q: How long to build this in Day 06?**
+   - A: We have 6 hours. We'll focus on the core: SQLite DB + simple ranking heuristic + minimal UI. No payment, no live scraping, no complex algorithm.
+
+---
+
+## Key messages to hammer home:
+
+1. **Evidence-first:** We're not building on assumptions. Every recommendation has a source.
+2. **User control:** AI suggests but user decides. Failure mode is clear.
+3. **Scope:** One slice only (Fast Delivery), not the full app. Fake data for MVP.
+4. **Day 06 ready:** We have schema, demo script, and owner assignments to ship by end of Day 06.
+
+---
+
+## Demo checklist (before presenting):
+- [ ] Fake dataset loaded in SQLite (restaurant table with ≥10 rows, ta_est, tags, evidence_links)
+- [ ] UI prototype (HTML + simple CSS, no JavaScript needed for demo)
+- [ ] Happy path runs end-to-end without errors
+- [ ] Failure path shows confidence badge and fallback
+- [ ] Evidence pop-up displays with timestamped sources
+- [ ] Demo time capped at 3 minutes (use timer)
+- [ ] Practice once: note where you talk too long
+- [ ] Have printout of this script for reference
+
+---
+
+## Post-demo logistics:
+- Have `description.md` printed or shared (QR code / link)
+- Hand out `repo-structure.txt` so stakeholders know what to expect Day 06
+- Collect 1–2 pieces of feedback (e.g., "Would you use this?" / "Which is more important: speed or accuracy?")
+- Log feedback in `02-group-spec/feedback.txt` for Day 06 validation
