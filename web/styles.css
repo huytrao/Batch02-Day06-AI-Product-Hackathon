@@ -60,8 +60,12 @@ button {
 .hero-panel {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 12px;
     padding: 28px;
+    align-self: start;
+    position: sticky;
+    top: 16px;
     background:
         linear-gradient(180deg, rgba(15, 118, 110, 0.08), rgba(255, 255, 255, 0) 42%),
         var(--surface);
@@ -121,15 +125,67 @@ h2 {
 }
 
 .hero-copy {
-    margin: 60px 0 34px;
+    margin: 20px 0 10px;
 }
 
 .hero-copy p {
     max-width: 520px;
-    margin-bottom: 18px;
+    margin-bottom: 8px;
     color: #344054;
     font-size: 18px;
     line-height: 1.55;
+}
+
+.hero-extra {
+    display: grid;
+    gap: 16px;
+    padding: 0 0 24px;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.extra-card {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.extra-card.pink-bg {
+    background: #fff5f7;
+    border-color: #ffdce5;
+}
+
+.extra-card.cyan-bg {
+    background: #f0fdfa;
+    border-color: #ccfbf1;
+}
+
+.extra-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.extra-card strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.extra-card p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.hero-illustration {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    opacity: 0.8;
+    border: 1px solid var(--line);
 }
 
 .trust-strip {

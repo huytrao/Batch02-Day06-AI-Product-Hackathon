@@ -122,7 +122,7 @@
                             <h3 class="card-title">${escapeHtml(itemName)} (${escapeHtml(vendor)})</h3>
                             <p class="vendor-line">Hạng #${index + 1} trong khu Ocean Park 1</p>
                         </div>
-                        ${sponsored ? '<span class="sponsor-chip">Partner signal</span>' : ""}
+                        ${sponsored ? '<span class="sponsor-chip">OP1</span>' : ""}
                     </div>
 
                     <div class="card-body">

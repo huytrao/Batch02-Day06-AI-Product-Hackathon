@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WEB_DIR="$ROOT_DIR/web"
 ARTIFACT_DIR="$ROOT_DIR/artifacts"
 LOG_FILE="$ARTIFACT_DIR/deploy_log.md"
+SUCCESS_FILE="$ARTIFACT_DIR/deploy_success.md"
 
 if [ -f "$ROOT_DIR/.env" ]; then
     set -a
@@ -49,29 +50,18 @@ if [ ! -d "$WEB_DIR" ]; then
     exit 1
 fi
 
-if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
-    {
-        printf "Cloudflare deploy needs authentication.\n"
-        printf "This script is safe for non-interactive deploys, so set CLOUDFLARE_API_TOKEN before running it.\n"
-        printf "Interactive login must be run directly in your terminal first:\n"
-        printf "  npx wrangler login\n"
-        printf "Then rerun:\n"
-        printf "  bash scripts/deploy_cloudflare.sh\n"
-        printf "Alternative:\n"
-        printf "  export CLOUDFLARE_API_TOKEN=your_token_here\n"
-        printf "  bash scripts/deploy_cloudflare.sh\n"
-    } | tee "$TMP_LOG"
-    append_log "failed" "n/a" "Missing Cloudflare auth. Run interactive login in a real terminal, or export CLOUDFLARE_API_TOKEN."
-    exit 1
-fi
-
 if command -v wrangler >/dev/null 2>&1; then
     DEPLOY_CMD=(wrangler pages deploy "$WEB_DIR" --project-name "$PROJECT_NAME" --branch "$BRANCH_NAME" --commit-dirty=true)
 else
     DEPLOY_CMD=(npx wrangler pages deploy "$WEB_DIR" --project-name "$PROJECT_NAME" --branch "$BRANCH_NAME" --commit-dirty=true)
 fi
 
-printf "Deploying %s to Cloudflare Pages project %s...\n" "$WEB_DIR" "$PROJECT_NAME" | tee "$TMP_LOG"
+if [ -n "${CLOUDFLARE_API_TOKEN:-}" ]; then
+    printf "Using CLOUDFLARE_API_TOKEN from environment/.env.\n" | tee "$TMP_LOG"
+else
+    printf "No CLOUDFLARE_API_TOKEN found; using Wrangler OAuth login session.\n" | tee "$TMP_LOG"
+fi
+printf "Deploying %s to Cloudflare Pages project %s...\n" "$WEB_DIR" "$PROJECT_NAME" | tee -a "$TMP_LOG"
 "${DEPLOY_CMD[@]}" 2>&1 | tee -a "$TMP_LOG"
 STATUS=${PIPESTATUS[0]}
 
@@ -82,6 +72,19 @@ fi
 
 if [ "$STATUS" -eq 0 ]; then
     append_log "success" "$PUBLIC_URL" "Cloudflare Pages deploy completed."
+    {
+        printf "# Deploy Success\n\n"
+        printf -- "- Status: success\n"
+        printf -- "- Public URL: %s\n" "$PUBLIC_URL"
+        printf -- "- Platform: Cloudflare Pages\n"
+        printf -- "- Project: \`%s\`\n" "$PROJECT_NAME"
+        printf -- "- Source directory: \`web/\`\n"
+        printf -- "- Deploy time: \`%s\`\n\n" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+        printf "Run again:\n"
+        printf '```bash\n'
+        printf "bash scripts/deploy_cloudflare.sh\n"
+        printf '```\n'
+    } > "$SUCCESS_FILE"
     printf "Deploy success: %s\n" "$PUBLIC_URL"
 else
     if grep -q "Authentication error" "$TMP_LOG"; then

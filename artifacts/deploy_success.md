@@ -1,12 +1,11 @@
 # Deploy Success
 
 - Status: success
-- Public URL: https://8393473e.ocean-park-1-eats.pages.dev
+- Public URL: https://4e0366d1.ocean-park-1-eats.pages.dev
 - Platform: Cloudflare Pages
 - Project: `ocean-park-1-eats`
 - Source directory: `web/`
-- Verified: `HTTP/2 200`
-- Deploy time: `2026-06-04T05:44:18Z`
+- Deploy time: `2026-06-04T07:20:36Z`
 
 Run again:
 ```bash
