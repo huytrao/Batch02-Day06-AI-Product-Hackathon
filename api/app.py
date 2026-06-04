@@ -20,12 +20,15 @@ if str(_REPO_ROOT) not in sys.path:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import router
+from api.feedback_routes import create_feedback_router
+from api.request_logger import install_request_logger
+from api.feedback_db import init_feedback_db
 from api import db
 from api.version import __version__
 
 app = FastAPI(
-    title="Ocean Park 1 Eats — API",
-    description="ReAct-agent-powered restaurant recommendation system for Ocean Park 1 residents.",
+    title="Ocean Park 1 Gợi Ý — API",
+    description="Trợ lý gợi ý quán ăn dùng ReAct agent cho cư dân Ocean Park 1.",
     version=__version__,
 )
 
@@ -41,9 +44,18 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
+# Request/response evidence logging (PII-scrubbed) — Member E
+# ---------------------------------------------------------------------------
+install_request_logger(app)
+
+# ---------------------------------------------------------------------------
 # Mount routes
+#   - api.routes:        /api/query, /api/health          (Members B + C)
+#   - feedback router:   /api/feedback, /api/analytics,
+#                        /api/partner-stats               (Member E)
 # ---------------------------------------------------------------------------
 app.include_router(router)
+app.include_router(create_feedback_router(), prefix="/api")
 
 
 # ---------------------------------------------------------------------------
@@ -57,6 +69,11 @@ async def startup():
     except Exception as e:
         print(f"[startup] WARNING: Could not connect to DB: {e}")
         print("Make sure to run `python scripts/generate_seed_data.py` first.")
+    try:
+        init_feedback_db()
+        print("[startup] Feedback DB initialized.")
+    except Exception as e:
+        print(f"[startup] WARNING: Could not initialize feedback DB: {e}")
 
 
 # ---------------------------------------------------------------------------

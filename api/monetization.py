@@ -10,8 +10,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from analytics import get_partner_performance
-from feedback_db import DEFAULT_DB_PATH, record_partner_event
+from .analytics import get_partner_performance
+from .feedback_db import DEFAULT_DB_PATH, record_partner_event
 
 
 def get_partner_stats(partner: str, db_path: Path | str = DEFAULT_DB_PATH, days: int = 7) -> dict[str, Any]:

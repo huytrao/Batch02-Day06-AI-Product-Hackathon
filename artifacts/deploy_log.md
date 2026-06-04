@@ -222,3 +222,61 @@ Uploading... (6/6)
 ```
 </details>
 
+## 2026-06-04T08:34:25Z
+- Project: `ocean-park-1-eats`
+- Directory: `web/`
+- Branch: `main`
+- Commit: `f472f60`
+- Status: failed
+- Finished at: `2026-06-04T08:34:36Z`
+- Public URL: n/a
+- Notes: Run `npx wrangler login` or set `CLOUDFLARE_API_TOKEN`, then rerun this script.
+
+<details><summary>Deploy output</summary>
+
+```text
+No CLOUDFLARE_API_TOKEN found; using Wrangler OAuth login session.
+Deploying /home/manhnd/Batch02-Day06-AI-Product-Hackathon/web to Cloudflare Pages project ocean-park-1-eats...
+Need to install the following packages:
+wrangler@4.97.0
+Ok to proceed? (y) 
+ ⛅️ wrangler 4.97.0
+───────────────────
+Cloudflare agent skills are available for: Claude Code, OpenCode, Cline, Codex, GitHub Copilot, Gemini CLI, Kiro CLI, Antigravity. Run wrangler in an interactive terminal to install them, or use `--install-skills` to install without prompting.
+
+✘ [ERROR] In a non-interactive environment, it's necessary to set a CLOUDFLARE_API_TOKEN environment variable for wrangler to work. Please go to https://developers.cloudflare.com/fundamentals/api/get-started/create-token/ for instructions on how to create an api token, and assign its value to CLOUDFLARE_API_TOKEN.
+
+
+🪵  Logs were written to "/home/manhnd/.config/.wrangler/logs/wrangler-2026-06-04_08-34-35_775.log"
+
+```
+</details>
+
+## 2026-06-04T09:31:33Z
+- Project: `ocean-park-1-eats`
+- Directory: `web/`
+- Branch: `main`
+- Commit: `f472f60`
+- Status: failed
+- Finished at: `2026-06-04T09:31:36Z`
+- Public URL: n/a
+- Notes: Run `npx wrangler login` or set `CLOUDFLARE_API_TOKEN`, then rerun this script.
+
+<details><summary>Deploy output</summary>
+
+```text
+No CLOUDFLARE_API_TOKEN found; using Wrangler OAuth login session.
+Deploying /home/manhnd/Batch02-Day06-AI-Product-Hackathon/web to Cloudflare Pages project ocean-park-1-eats...
+
+ ⛅️ wrangler 4.97.0
+───────────────────
+Cloudflare agent skills are available for: Claude Code, OpenCode, Cline, Codex, GitHub Copilot, Gemini CLI, Kiro CLI, Antigravity. Run wrangler in an interactive terminal to install them, or use `--install-skills` to install without prompting.
+
+✘ [ERROR] In a non-interactive environment, it's necessary to set a CLOUDFLARE_API_TOKEN environment variable for wrangler to work. Please go to https://developers.cloudflare.com/fundamentals/api/get-started/create-token/ for instructions on how to create an api token, and assign its value to CLOUDFLARE_API_TOKEN.
+
+
+🪵  Logs were written to "/home/manhnd/.config/.wrangler/logs/wrangler-2026-06-04_09-31-34_896.log"
+
+```
+</details>
+

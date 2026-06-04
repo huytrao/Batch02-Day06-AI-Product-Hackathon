@@ -8,10 +8,10 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT / "api"))
+sys.path.insert(0, str(PROJECT_ROOT))
 
-from analytics import write_weekly_report  # noqa: E402
-from feedback_db import DEFAULT_DB_PATH, init_feedback_db  # noqa: E402
+from api.analytics import write_weekly_report  # noqa: E402
+from api.feedback_db import DEFAULT_DB_PATH, init_feedback_db  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:

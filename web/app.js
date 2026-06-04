@@ -1,4 +1,4 @@
-const API_BASE_URL = window.OP_EATS_API_BASE_URL || "http://127.0.0.1:8000";
+const API_BASE_URL = window.OP_EATS_API_BASE_URL || "http://127.0.0.1:8001";
 
 const els = {
     form: document.getElementById("searchForm"),
@@ -159,7 +159,7 @@ async function submitFeedback(suggestionId, query) {
 
     const widget = document.getElementById(`fb-widget-${suggestionId}`);
     if (widget) {
-        widget.innerHTML = '<p class="notice">Đã ghi nhận góp ý. Agent sẽ hạ độ tin cậy trong phiên nếu thông tin sai.</p>';
+        widget.innerHTML = '<p class="notice">Cảm ơn góp ý của bạn.</p>';
         widget.hidden = false;
     }
 }

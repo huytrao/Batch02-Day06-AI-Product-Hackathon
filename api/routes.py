@@ -52,18 +52,6 @@ class QueryResponse(BaseModel):
     execution_time_ms: int
 
 
-class FeedbackRequest(BaseModel):
-    query_text: str = Field(..., min_length=1, max_length=1000)
-    suggestion_id: int
-    rating: int = Field(..., ge=1, le=5)
-    feedback_text: str = Field(default="", max_length=2000)
-
-
-class FeedbackResponse(BaseModel):
-    status: str
-    feedback_id: int
-
-
 class HealthResponse(BaseModel):
     status: str
     version: str
@@ -88,24 +76,6 @@ async def handle_query(request: QueryRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Agent error: {str(e)}")
-
-
-@router.post("/feedback", response_model=FeedbackResponse)
-async def handle_feedback(request: FeedbackRequest):
-    """
-    Accept user feedback on a suggestion.
-    Stores rating and optional text feedback.
-    """
-    try:
-        feedback_id = db.save_feedback(
-            query_text=request.query_text,
-            suggestion_id=request.suggestion_id,
-            rating=request.rating,
-            feedback_text=request.feedback_text,
-        )
-        return FeedbackResponse(status="ok", feedback_id=feedback_id)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Feedback error: {str(e)}")
 
 
 @router.get("/health", response_model=HealthResponse)

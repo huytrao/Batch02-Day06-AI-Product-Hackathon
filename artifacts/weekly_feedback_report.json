@@ -1,7 +1,7 @@
 {
   "period_days": 7,
-  "generated_at": "2026-06-04T04:46:04+00:00",
-  "total_feedback": 1,
+  "generated_at": "2026-06-04T08:20:48+00:00",
+  "total_feedback": 2,
   "average_rating": 5.0,
   "accuracy_rate": 1.0,
   "failure_rate": 0.0,
@@ -9,17 +9,21 @@
   "top_queries": [
     [
       "giao nhanh",
-      1
+      2
     ]
   ],
   "partner_feedback_count": [
+    [
+      "ShopeeFood",
+      1
+    ],
     [
       "GrabFood",
       1
     ]
   ],
   "confidence_mix": {
-    "HIGH": 1
+    "HIGH": 2
   },
   "pending_corrections": 0,
   "high_severity_corrections": 0,

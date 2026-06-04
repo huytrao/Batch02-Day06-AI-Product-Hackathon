@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from feedback_db import DEFAULT_DB_PATH, connect, init_feedback_db
+from .feedback_db import DEFAULT_DB_PATH, connect, init_feedback_db
 
 
 SUCCESS_OUTCOMES = {"ordered"}
