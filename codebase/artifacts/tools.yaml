@@ -1,0 +1,67 @@
+tools:
+  - name: query_restaurants
+    description: Query the database for restaurants in a specific location within a max wait time.
+    parameters:
+      type: object
+      properties:
+        location:
+          type: string
+          description: The location to search in (e.g., 'Ocean Park 1').
+        max_wait_time:
+          type: integer
+          description: Maximum acceptable wait time in minutes.
+      required:
+        - location
+        - max_wait_time
+  - name: get_eta_estimate
+    description: Get a precise ETA and confidence score for a given restaurant.
+    parameters:
+      type: object
+      properties:
+        restaurant_id:
+          type: integer
+          description: The ID of the restaurant.
+      required:
+        - restaurant_id
+  - name: get_evidence
+    description: Get evidence like source links and reviews for a specific restaurant to build trust.
+    parameters:
+      type: object
+      properties:
+        restaurant_id:
+          type: integer
+          description: The ID of the restaurant.
+      required:
+        - restaurant_id
+  - name: record_feedback
+    description: Record user feedback (rating and text) for a given suggestion.
+    parameters:
+      type: object
+      properties:
+        query:
+          type: string
+          description: The original user query.
+        suggestion_id:
+          type: integer
+          description: The ID of the suggested restaurant.
+        user_rating:
+          type: integer
+          description: Rating out of 5 given by the user.
+        feedback_text:
+          type: string
+          description: Any additional feedback text provided by the user.
+      required:
+        - query
+        - suggestion_id
+        - user_rating
+        - feedback_text
+  - name: clarify
+    description: Ask a clarifying question to the user if the request is ambiguous.
+    parameters:
+      type: object
+      properties:
+        question:
+          type: string
+          description: The clarifying question to ask.
+      required:
+        - question

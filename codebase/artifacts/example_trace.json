@@ -1,0 +1,88 @@
+{
+  "query": "Giao nhanh ở Ocean Park 1",
+  "action_trace": [
+    {
+      "step": 1,
+      "type": "think",
+      "thought": "User query: 'Giao nhanh ở Ocean Park 1'. I need to extract location and requirements."
+    },
+    {
+      "step": 2,
+      "type": "think",
+      "thought": "Extracted location: 'Ocean Park 1'. Requirement: 'fast delivery' (e.g., max 45 mins wait time). I should query restaurants."
+    },
+    {
+      "step": 3,
+      "type": "action",
+      "tool": "query_restaurants",
+      "params": {
+        "location": "Ocean Park 1",
+        "max_wait_time": 45
+      },
+      "result": [
+        {
+          "id": 1,
+          "name": "Quán A",
+          "location": "Ocean Park 1",
+          "estimated_wait": 30
+        },
+        {
+          "id": 2,
+          "name": "Quán B",
+          "location": "Ocean Park 1",
+          "estimated_wait": 25
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "type": "think",
+      "thought": "Found 2 candidate restaurants. I need to get accurate ETA estimates for them."
+    },
+    {
+      "step": 5,
+      "type": "action",
+      "tool": "get_eta_estimate",
+      "params": {
+        "restaurant_id": 1
+      },
+      "result": {
+        "predicted_eta": 32,
+        "confidence": 0.85
+      }
+    },
+    {
+      "step": 6,
+      "type": "action",
+      "tool": "get_eta_estimate",
+      "params": {
+        "restaurant_id": 2
+      },
+      "result": {
+        "predicted_eta": 27,
+        "confidence": 0.9
+      }
+    },
+    {
+      "step": 7,
+      "type": "think",
+      "thought": "Evaluated ETAs. The best suggestion is 'Quán B' with an ETA of 27 minutes. I will construct the final answer."
+    }
+  ],
+  "final_answer": {
+    "suggestions": [
+      {
+        "id": 2,
+        "name": "Quán B",
+        "eta": 27,
+        "confidence": 0.9
+      },
+      {
+        "id": 1,
+        "name": "Quán A",
+        "eta": 32,
+        "confidence": 0.85
+      }
+    ]
+  }
+}
