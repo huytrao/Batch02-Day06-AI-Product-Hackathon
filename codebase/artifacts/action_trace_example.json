@@ -1,0 +1,72 @@
+{
+  "query": "Giao nhanh ở Ocean Park 1",
+  "action_trace": [
+    {
+      "step": 1,
+      "type": "think",
+      "thought": "User wants fast delivery near Ocean Park 1. I should query nearby restaurants with a delivery ETA limit."
+    },
+    {
+      "step": 2,
+      "type": "action",
+      "tool": "query_restaurants",
+      "params": {
+        "location": "Ocean Park 1",
+        "max_wait_time": 45
+      },
+      "result": [
+        {
+          "id": 1,
+          "name": "Quán A - Phở Nhanh Ocean",
+          "location": "Ocean Park 1",
+          "cuisine": "pho",
+          "rating": 4.6,
+          "avg_price": 32000,
+          "predicted_eta": 32,
+          "confidence": 0.85,
+          "is_open": true
+        },
+        {
+          "id": 2,
+          "name": "Quán B - Bún Bò 45",
+          "location": "Ocean Park 1",
+          "cuisine": "bun bo",
+          "rating": 4.4,
+          "avg_price": 38000,
+          "predicted_eta": 38,
+          "confidence": 0.8,
+          "is_open": true
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "type": "think",
+      "thought": "Quán A is the fastest candidate, so I should verify its ETA confidence."
+    },
+    {
+      "step": 4,
+      "type": "action",
+      "tool": "get_eta_estimate",
+      "params": {
+        "restaurant_id": 1
+      },
+      "result": {
+        "restaurant_id": 1,
+        "predicted_eta": 32,
+        "confidence": 0.85
+      }
+    }
+  ],
+  "final_answer": {
+    "suggestions": [
+      {
+        "id": 1,
+        "name": "Quán A - Phở Nhanh Ocean",
+        "eta": 32,
+        "confidence": 0.85,
+        "reason": "Gần Ocean Park 1, ETA nhanh nhất trong danh sách và confidence tốt."
+      }
+    ]
+  }
+}

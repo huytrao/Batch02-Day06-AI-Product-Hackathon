@@ -1,67 +1,86 @@
 tools:
   - name: query_restaurants
-    description: Query the database for restaurants in a specific location within a max wait time.
-    parameters:
+    description: Search restaurant candidates by location and optional maximum delivery wait time.
+    params:
       type: object
+      required:
+        - location
       properties:
         location:
           type: string
-          description: The location to search in (e.g., 'Ocean Park 1').
+          description: Area to search, for example Ocean Park 1.
         max_wait_time:
           type: integer
-          description: Maximum acceptable wait time in minutes.
-      required:
-        - location
-        - max_wait_time
+          description: Maximum acceptable delivery ETA in minutes.
+    returns:
+      type: array
+      description: Restaurant candidates with id, name, location, rating, predicted_eta, and confidence.
+
   - name: get_eta_estimate
-    description: Get a precise ETA and confidence score for a given restaurant.
-    parameters:
+    description: Get predicted delivery ETA and confidence for a restaurant.
+    params:
       type: object
+      required:
+        - restaurant_id
       properties:
         restaurant_id:
           type: integer
-          description: The ID of the restaurant.
-      required:
-        - restaurant_id
+          description: Restaurant id returned by query_restaurants.
+    returns:
+      type: object
+      description: predicted_eta in minutes and confidence from 0.0 to 1.0.
+
   - name: get_evidence
-    description: Get evidence like source links and reviews for a specific restaurant to build trust.
-    parameters:
+    description: Fetch source links and review evidence for a restaurant.
+    params:
       type: object
+      required:
+        - restaurant_id
       properties:
         restaurant_id:
           type: integer
-          description: The ID of the restaurant.
-      required:
-        - restaurant_id
-  - name: record_feedback
-    description: Record user feedback (rating and text) for a given suggestion.
-    parameters:
+          description: Restaurant id to inspect.
+    returns:
       type: object
-      properties:
-        query:
-          type: string
-          description: The original user query.
-        suggestion_id:
-          type: integer
-          description: The ID of the suggested restaurant.
-        user_rating:
-          type: integer
-          description: Rating out of 5 given by the user.
-        feedback_text:
-          type: string
-          description: Any additional feedback text provided by the user.
+      description: source_links and review summaries.
+
+  - name: record_feedback
+    description: Store user feedback for a recommendation.
+    params:
+      type: object
       required:
         - query
         - suggestion_id
         - user_rating
-        - feedback_text
-  - name: clarify
-    description: Ask a clarifying question to the user if the request is ambiguous.
-    parameters:
+      properties:
+        query:
+          type: string
+          description: Original user query.
+        suggestion_id:
+          type: integer
+          description: Restaurant id or suggestion id being rated.
+        user_rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: User rating from 1 to 5.
+        feedback_text:
+          type: string
+          description: Optional free-text feedback.
+    returns:
       type: object
+      description: Feedback recording status and id.
+
+  - name: clarify
+    description: Ask the user a focused clarification question.
+    params:
+      type: object
+      required:
+        - question
       properties:
         question:
           type: string
-          description: The clarifying question to ask.
-      required:
-        - question
+          description: Question to ask before continuing.
+    returns:
+      type: object
+      description: Clarification request for the next user turn.

@@ -1,98 +1,229 @@
-"""
-Executes the tools defined in api/tools.py against a sample SQLite/mock database.
-"""
 import sqlite3
-import json
-from typing import List, Dict, Any
-
-# Setup an in-memory SQLite database for demonstration
-conn = sqlite3.connect(":memory:", check_same_thread=False)
-cursor = conn.cursor()
-
-# Create sample tables
-cursor.execute('''
-CREATE TABLE restaurants (
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    location TEXT,
-    base_prep_time INTEGER
-)
-''')
-cursor.execute('''
-CREATE TABLE feedback (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    query TEXT,
-    suggestion_id INTEGER,
-    user_rating INTEGER,
-    feedback_text TEXT
-)
-''')
-
-# Insert sample data
-cursor.executemany('''
-INSERT INTO restaurants (id, name, location, base_prep_time) VALUES (?, ?, ?, ?)
-''', [
-    (1, 'Quán A', 'Ocean Park 1', 20),
-    (2, 'Quán B', 'Ocean Park 1', 15),
-    (3, 'Quán C', 'Ocean Park 2', 25)
-])
-conn.commit()
+from pathlib import Path
 
 
-def query_restaurants(location: str, max_wait_time: int) -> List[Dict[str, Any]]:
-    # Simple logic: assume base_prep_time + 10 mins delivery <= max_wait_time
-    cursor.execute(
-        "SELECT id, name, location, base_prep_time FROM restaurants WHERE location = ?",
-        (location,)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
+DB_PATH = DATA_DIR / "restaurants.sqlite"
+
+
+SAMPLE_RESTAURANTS = [
+    (
+        1,
+        "Quán A - Phở Nhanh Ocean",
+        "Ocean Park 1",
+        "pho",
+        4.6,
+        32000,
+        32,
+        0.85,
+        1,
+        "Fast delivery near Ocean Park 1 with many lunch reviews.",
+        "https://example.com/restaurants/quan-a",
+    ),
+    (
+        2,
+        "Quán B - Bún Bò 45",
+        "Ocean Park 1",
+        "bun bo",
+        4.4,
+        38000,
+        38,
+        0.80,
+        1,
+        "Good delivery reliability and affordable meals.",
+        "https://example.com/restaurants/quan-b",
+    ),
+    (
+        3,
+        "Cơm Chay An Lạc",
+        "VinUni",
+        "vegetarian",
+        4.7,
+        30000,
+        26,
+        0.90,
+        1,
+        "Vegetarian menu with quick delivery around VinUni.",
+        "https://example.com/restaurants/com-chay-an-lac",
+    ),
+    (
+        4,
+        "Lẩu Thái 5 Anh Em",
+        "Ocean Park 2",
+        "hotpot",
+        4.5,
+        120000,
+        45,
+        0.78,
+        1,
+        "Group-friendly hotpot option with stable evening demand.",
+        "https://example.com/restaurants/lau-thai-5-anh-em",
+    ),
+    (
+        5,
+        "Al Fresco's Ocean",
+        "Ocean Park 1",
+        "european",
+        4.1,
+        150000,
+        None,
+        0.25,
+        0,
+        "Opening hours and delivery ETA are uncertain late at night.",
+        "https://example.com/restaurants/al-frescos-ocean",
+    ),
+]
+
+
+def _connect():
+    DATA_DIR.mkdir(exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    _ensure_schema(conn)
+    return conn
+
+
+def _ensure_schema(conn):
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS restaurants (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            location TEXT NOT NULL,
+            cuisine TEXT NOT NULL,
+            rating REAL NOT NULL,
+            avg_price INTEGER NOT NULL,
+            predicted_eta INTEGER,
+            confidence REAL NOT NULL,
+            is_open INTEGER NOT NULL,
+            evidence_summary TEXT NOT NULL,
+            source_url TEXT NOT NULL
+        )
+        """
     )
-    results = cursor.fetchall()
-    candidates = []
-    for row in results:
-        r_id, name, loc, prep_time = row
-        if prep_time + 10 <= max_wait_time:
-            candidates.append({
-                "id": r_id,
-                "name": name,
-                "location": loc,
-                "estimated_wait": prep_time + 10
-            })
-    return candidates
-
-
-def get_eta_estimate(restaurant_id: int) -> Dict[str, Any]:
-    # Mocking an ETA engine
-    cursor.execute("SELECT base_prep_time FROM restaurants WHERE id = ?", (restaurant_id,))
-    row = cursor.fetchone()
-    if row:
-        prep_time = row[0]
-        # ETA = prep_time + traffic_delay (mocked as 12)
-        return {"predicted_eta": prep_time + 12, "confidence": 0.85}
-    return {"error": "Restaurant not found"}
-
-
-def get_evidence(restaurant_id: int) -> Dict[str, Any]:
-    # Mock evidence
-    if restaurant_id in [1, 2]:
-        return {
-            "source_links": [f"https://food-delivery.com/restaurant/{restaurant_id}"],
-            "reviews": ["Đồ ăn ngon, giao nhanh", "Đóng gói cẩn thận"]
-        }
-    return {"error": "No evidence found"}
-
-
-def record_feedback(query: str, suggestion_id: int, user_rating: int, feedback_text: str) -> Dict[str, Any]:
-    cursor.execute(
-        "INSERT INTO feedback (query, suggestion_id, user_rating, feedback_text) VALUES (?, ?, ?, ?)",
-        (query, suggestion_id, user_rating, feedback_text)
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            query TEXT NOT NULL,
+            suggestion_id INTEGER NOT NULL,
+            user_rating INTEGER NOT NULL,
+            feedback_text TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
     )
+    count = conn.execute("SELECT COUNT(*) AS count FROM restaurants").fetchone()["count"]
+    if count == 0:
+        conn.executemany(
+            """
+            INSERT INTO restaurants (
+                id, name, location, cuisine, rating, avg_price, predicted_eta,
+                confidence, is_open, evidence_summary, source_url
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            SAMPLE_RESTAURANTS,
+        )
     conn.commit()
-    return {"status": "success", "message": "Feedback recorded."}
 
 
-def clarify(question: str) -> Dict[str, Any]:
-    # In a real system, this would interrupt execution and prompt the user.
-    # Here, we mock a simulated user response or system state.
-    return {"status": "waiting_for_user", "question_asked": question}
+def _row_to_restaurant(row):
+    return {
+        "id": row["id"],
+        "name": row["name"],
+        "location": row["location"],
+        "cuisine": row["cuisine"],
+        "rating": row["rating"],
+        "avg_price": row["avg_price"],
+        "predicted_eta": row["predicted_eta"],
+        "confidence": max(0.0, min(1.0, row["confidence"])),
+        "is_open": bool(row["is_open"]),
+    }
+
+
+def query_restaurants(location, max_wait_time=None):
+    """Return restaurant candidates filtered by location and optional ETA limit."""
+    with _connect() as conn:
+        sql = "SELECT * FROM restaurants WHERE lower(location) LIKE ?"
+        params = [f"%{location.lower()}%"]
+        if max_wait_time is not None:
+            sql += " AND (predicted_eta IS NULL OR predicted_eta <= ?)"
+            params.append(int(max_wait_time))
+        sql += " ORDER BY is_open DESC, confidence DESC, rating DESC LIMIT 5"
+        rows = conn.execute(sql, params).fetchall()
+    return [_row_to_restaurant(row) for row in rows]
+
+
+def get_eta_estimate(restaurant_id):
+    """Return predicted delivery ETA and confidence for one restaurant."""
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT id, predicted_eta, confidence FROM restaurants WHERE id = ?",
+            (int(restaurant_id),),
+        ).fetchone()
+    if row is None:
+        return {"restaurant_id": restaurant_id, "predicted_eta": None, "confidence": 0.0}
+    return {
+        "restaurant_id": row["id"],
+        "predicted_eta": row["predicted_eta"],
+        "confidence": max(0.0, min(1.0, row["confidence"])),
+    }
+
+
+def get_evidence(restaurant_id):
+    """Return source links and review evidence for one restaurant."""
+    with _connect() as conn:
+        row = conn.execute(
+            """
+            SELECT id, name, rating, evidence_summary, source_url
+            FROM restaurants
+            WHERE id = ?
+            """,
+            (int(restaurant_id),),
+        ).fetchone()
+    if row is None:
+        return {"restaurant_id": restaurant_id, "source_links": [], "reviews": []}
+    return {
+        "restaurant_id": row["id"],
+        "source_links": [row["source_url"]],
+        "reviews": [
+            {
+                "restaurant": row["name"],
+                "rating": row["rating"],
+                "summary": row["evidence_summary"],
+            }
+        ],
+    }
+
+
+def record_feedback(query, suggestion_id, user_rating, feedback_text=""):
+    """Persist user feedback for future evaluation."""
+    rating = int(user_rating)
+    if rating < 1 or rating > 5:
+        raise ValueError("user_rating must be an integer from 1 to 5")
+
+    with _connect() as conn:
+        cursor = conn.execute(
+            """
+            INSERT INTO feedback (query, suggestion_id, user_rating, feedback_text)
+            VALUES (?, ?, ?, ?)
+            """,
+            (query, int(suggestion_id), rating, feedback_text or ""),
+        )
+        conn.commit()
+        feedback_id = cursor.lastrowid
+    return {"status": "recorded", "feedback_id": feedback_id}
+
+
+def clarify(question):
+    """Return a clarification request for the next user turn."""
+    return {
+        "needs_clarification": True,
+        "question": question,
+        "instruction": "Ask the user this question before calling search tools.",
+    }
 
 
 TOOL_RUNNERS = {
@@ -100,5 +231,14 @@ TOOL_RUNNERS = {
     "get_eta_estimate": get_eta_estimate,
     "get_evidence": get_evidence,
     "record_feedback": record_feedback,
-    "clarify": clarify
+    "clarify": clarify,
 }
+
+
+def execute_tool(tool_name, params):
+    """Dispatch a named tool call with JSON params."""
+    if tool_name not in TOOL_RUNNERS:
+        raise ValueError(f"Unknown tool: {tool_name}")
+    if not isinstance(params, dict):
+        raise ValueError("Tool params must be a JSON object")
+    return TOOL_RUNNERS[tool_name](**params)

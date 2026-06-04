@@ -1,92 +1,136 @@
-"""
-ReAct Agent Implementation.
-Handles the Reasoning and Acting loop.
-"""
-from typing import List, Dict, Any, Callable
 import json
+import os
+import sys
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+load_dotenv()
+
+from api.providers.openrouter_provider import OpenRouterProvider
+from api.tool_runners import execute_tool
+
 
 class ReActAgent:
-    def __init__(self, tool_registry: Dict[str, Callable], system_prompt: str = ""):
-        self.tool_registry = tool_registry
-        self.system_prompt = system_prompt
-        self.action_trace = []
-        self.step_counter = 1
+    """Small ReAct agent for restaurant search and feedback workflows."""
 
-    def _think(self, thought: str):
-        self.action_trace.append({
-            "step": self.step_counter,
-            "type": "think",
-            "thought": thought
-        })
-        self.step_counter += 1
+    def __init__(self, provider=None, max_steps=8):
+        self.provider = provider or OpenRouterProvider()
+        self.max_steps = max_steps
+        self.system_prompt = self._load_system_prompt()
 
-    def _act(self, tool_name: str, params: Dict[str, Any]) -> Any:
-        tool_func = self.tool_registry.get(tool_name)
-        if not tool_func:
-            result = {"error": f"Tool {tool_name} not found"}
-        else:
+    def _load_system_prompt(self):
+        prompt_path = Path(__file__).resolve().parent.parent / "artifacts" / "system_prompt.md"
+        if prompt_path.exists():
+            return prompt_path.read_text(encoding="utf-8")
+        return "You are an AI assistant using the ReAct framework."
+
+    def _extract_json(self, text):
+        text = text.strip()
+        if text.startswith("```json"):
+            text = text[7:]
+        elif text.startswith("```"):
+            text = text[3:]
+        if text.endswith("```"):
+            text = text[:-3]
+        return text.strip()
+
+    def _parse_model_response(self, response_text):
+        json_str = self._extract_json(response_text)
+        parsed = json.loads(json_str)
+        if not isinstance(parsed, dict):
+            raise ValueError("LLM response must be a JSON object")
+        return json_str, parsed
+
+    def run(self, user_query):
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": f"User Query: {user_query}"},
+        ]
+        action_trace = []
+        step_count = 1
+
+        for _ in range(self.max_steps):
             try:
-                result = tool_func(**params)
-            except Exception as e:
-                result = {"error": str(e)}
-        
-        self.action_trace.append({
-            "step": self.step_counter,
-            "type": "action",
-            "tool": tool_name,
-            "params": params,
-            "result": result
-        })
-        self.step_counter += 1
-        return result
+                response_text = self.provider.chat_completion(messages)
+                json_str, parsed = self._parse_model_response(response_text)
+            except ValueError as exc:
+                return {
+                    "query": user_query,
+                    "action_trace": action_trace,
+                    "error": str(exc),
+                }
+            except Exception as exc:
+                return {
+                    "query": user_query,
+                    "action_trace": action_trace,
+                    "error": f"Failed to parse LLM response: {exc}",
+                }
 
-    def run(self, query: str) -> Dict[str, Any]:
-        """
-        Mocking the LLM reasoning loop.
-        In a real scenario, an LLM would generate the thoughts and tool calls based on the system prompt and history.
-        Here we hardcode the sequence to demonstrate the ReAct pattern for the specific use case.
-        """
-        self.action_trace = []
-        self.step_counter = 1
-        
-        # ReAct Loop Simulation
-        self._think(f"User query: '{query}'. I need to extract location and requirements.")
-        self._think("Extracted location: 'Ocean Park 1'. Requirement: 'fast delivery' (e.g., max 45 mins wait time). I should query restaurants.")
-        
-        restaurants = self._act("query_restaurants", {"location": "Ocean Park 1", "max_wait_time": 45})
-        
-        self._think(f"Found {len(restaurants)} candidate restaurants. I need to get accurate ETA estimates for them.")
-        
-        best_suggestions = []
-        for rest in restaurants:
-            eta_info = self._act("get_eta_estimate", {"restaurant_id": rest["id"]})
-            if "predicted_eta" in eta_info:
-                best_suggestions.append({
-                    "id": rest["id"],
-                    "name": rest["name"],
-                    "eta": eta_info["predicted_eta"],
-                    "confidence": eta_info.get("confidence", 0.0)
-                })
-        
-        # Sort by lowest ETA
-        best_suggestions.sort(key=lambda x: x["eta"])
-        
-        if best_suggestions:
-            self._think(f"Evaluated ETAs. The best suggestion is '{best_suggestions[0]['name']}' with an ETA of {best_suggestions[0]['eta']} minutes. I will construct the final answer.")
-            final_answer = {"suggestions": best_suggestions}
-        else:
-            self._think("No suitable restaurants found meeting the criteria. I will ask the user to modify the requirements.")
-            final_answer = {"suggestions": []}
-            
+            thought = parsed.get("thought")
+            if thought:
+                action_trace.append(
+                    {"step": step_count, "type": "think", "thought": thought}
+                )
+                step_count += 1
+
+            if "tool" in parsed:
+                tool_name = parsed["tool"]
+                params = parsed.get("params", {})
+                try:
+                    tool_result = execute_tool(tool_name, params)
+                except Exception as exc:
+                    tool_result = {"error": str(exc)}
+
+                action_trace.append(
+                    {
+                        "step": step_count,
+                        "type": "action",
+                        "tool": tool_name,
+                        "params": params,
+                        "result": tool_result,
+                    }
+                )
+                step_count += 1
+
+                messages.append({"role": "assistant", "content": json_str})
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": "Tool Result: "
+                        + json.dumps(tool_result, ensure_ascii=False),
+                    }
+                )
+                continue
+
+            if "final_answer" in parsed:
+                return {
+                    "query": user_query,
+                    "action_trace": action_trace,
+                    "final_answer": parsed["final_answer"],
+                }
+
+            messages.append({"role": "assistant", "content": json_str})
+            messages.append(
+                {
+                    "role": "user",
+                    "content": (
+                        "Error: return JSON with either a 'tool' call or "
+                        "a 'final_answer'."
+                    ),
+                }
+            )
+
         return {
-            "query": query,
-            "action_trace": self.action_trace,
-            "final_answer": final_answer
+            "query": user_query,
+            "action_trace": action_trace,
+            "error": "Agent stopped after reaching maximum steps.",
         }
 
+
 if __name__ == "__main__":
-    # Simple manual test
-    from tool_runners import TOOL_RUNNERS
-    agent = ReActAgent(tool_registry=TOOL_RUNNERS)
+    agent = ReActAgent()
     result = agent.run("Giao nhanh ở Ocean Park 1")
     print(json.dumps(result, indent=2, ensure_ascii=False))
